@@ -1,0 +1,27 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+}
+
+.rowFlex {
+    display: flex;
+    flex-direction: row;
+    flex-wrap:wrap;
+}
+
+.colFlex {
+    display: flex;
+    flex-direction: column;
+}
+
+.mainCenter {
+    justify-content: center;
+}
+.crossCenter {
+    align-items: center;
+}
+

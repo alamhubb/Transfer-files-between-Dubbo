@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.springframework.org/schema/mvc">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <title>hello</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="/css/iconfont.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/MintUI/style.css">
+    <!-- 引入组件库 -->
+    <script src="/js/vue/vue.js"></script>
+    <script src="/js/vue/axios.min.js"></script>
+    <script src="/js/MintUI/index.js"></script>
+    <style>
+        .main {
+            margin-top: 50px;
+        }
+
+        textarea {
+            resize: none
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="colFlex" style="width: 100%">
+    <mt-header fixed style="height: 50px;background: #d3d4d6" title="交友">
+        <mt-button slot="right" @click="addTalk">发布</mt-button>
+    </mt-header>
+    <div class="main rowFlex" style="width: 100%">
+        <div style="width: 100%">
+            <mt-field style="width: 100%" type="textarea" rows="7" placeholder="说你想说的,别克制"
+                      v-model="talk"></mt-field>
+        </div>
+
+        <div style="width: 100%;height: auto">
+            <label for="img" class="icon iconfont icon-camera" style="font-size: 28px;"></label>
+            <input id="img" type="file" accept="image/*" style="opacity: 0" @change="upload">
+        </div>
+        <div v-show="imgs.length" class="rowFlex">
+            <img v-for="item in imgs" :src="item.src" alt="" style="width: 80px;height: 120px">
+            <div style="margin-left:10px;width: 80px;height: 120px;border: 1px black dashed;"
+                 class="colFlex center">
+                <label for="img" class="icon iconfont icon-add" style="font-size: 80px;"></label>
+                <input id="img" type="file" accept="image/*" style="opacity: 0;width: 0;height: 0" @change="upload">
+            </div>
+        </div>
+        <mt-button style="margin-left: 50px" @click="postImgs">上传</mt-button>
+    </div>
+    <!--<form action="/
+    add" method="post">
+        <input type="text" name="content">
+        <input type="submit">
+    </form>-->
+</div>
+<script th:inline="javascript">
+    var app = new Vue({
+        el: '#app',
+        data: {
+            talk: '',
+            imgs: [],
+            talkImgs: [],
+            index: 0
+        },
+        methods: {
+            upload(obj) {
+                const reader = new FileReader()
+                reader.readAsDataURL(obj.target.files[0]);
+                reader.onload = function () {
+                    app.imgs.push({img: obj.target.files[0], src: this.result})
+                    app.talkImgs.push({imgSrc: obj.target.files[0].name})
+                    app.index++
+                }
+            },
+            addTalk() {
+                console.log(1)
+                if (!(this.imgs.length === 0)) {
+                    this.postImgs()
+                } else {
+                    axios.post('/talk/add',
+                        {
+                            content: this.talk,
+                            imgs: this.talkImgs
+                        }).then(response => {
+                        window.history.back(-1)
+                    })
+                }
+            },
+            postImgs() {
+                let formData = new FormData();
+                let imgs = []
+                for (let img of this.imgs) {
+                    imgs.push(img.img)
+                    formData.append("files", img.img)
+                }
+                axios.post('/upload', formData)
+                    .then(response => {
+                        console.log(response.data);
+                        /*axios.post('/talk/add',
+                            {
+                                content: this.talk,
+                                imgs: this.talkImgs
+                            }).then(response => {
+                            window.history.back(-1)
+                        })*/
+                    })
+                    .catch(function (error) {
+                        alert("上传失败");
+                        console.log(error);
+                    });
+            }
+        }
+    })
+</script>
+</body>
+</html>
